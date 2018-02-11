@@ -5,27 +5,35 @@
  */
 package com.gramcha.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.gramcha.config.ConfigProvider;
 
 import redis.clients.jedis.Jedis;
 
 @Service
 public class DistributionService {
-	Jedis jedis = null;
-	Jedis jedis2 = null;
+	@Autowired
+	ConfigProvider config;
+	
+	private List<Jedis> redisInstances = new ArrayList<>();
 	@PostConstruct
 	void init() {
-		System.out.println("initilizing redis cache part");
-		jedis = new Jedis();
-		System.out.println("jedis 1 = "+jedis.toString());
-		jedis2 = new Jedis("127.0.0.1", 6380);
-		
-		jedis2.set("events/city/rome", "32,15,223,828-instance2");
+		System.out.println("connecting with redis cache instances");
+		config.getRedisInstances().forEach(item->{
+			Jedis jedis = new Jedis(item.getHost(), Integer.parseInt(item.getPort()));
+			System.out.println("connection created with "+item);
+			redisInstances.add(jedis);
+		});
 	}
 	
 	public String test() {
-		return jedis.get("events/city/rome")+" "+jedis2.get("events/city/rome");
+		return redisInstances.get(0).get("events/city/rome")+" "+redisInstances.get(1).get("events/city/rome");
 	}
 }
