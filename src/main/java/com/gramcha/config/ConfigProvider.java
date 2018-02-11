@@ -5,9 +5,26 @@
  */
 package com.gramcha.config;
 
+import java.util.List;
+
+import javax.validation.constraints.NotNull;
+
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-@Service
+@Component
+@ConfigurationProperties
 public class ConfigProvider {
+	@NotNull
+	private List<RedisHost> redisInstances;
 
+	public List<RedisHost> getRedisInstances() {
+		return redisInstances;
+	}
+
+	public void setRedisInstances(List<RedisHost> redisInstances) {
+		this.redisInstances = redisInstances;
+	}
+	
 }
