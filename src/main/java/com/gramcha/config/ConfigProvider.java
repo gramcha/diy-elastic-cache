@@ -19,12 +19,23 @@ public class ConfigProvider {
 	@NotNull
 	private List<RedisHost> redisInstances;
 
+	@NotNull
+	private String numberOfReplicas;
+	
 	public List<RedisHost> getRedisInstances() {
 		return redisInstances;
 	}
-
+	
 	public void setRedisInstances(List<RedisHost> redisInstances) {
 		this.redisInstances = redisInstances;
+	}
+
+	public int getNumberOfReplicas() {
+		return Integer.parseInt(numberOfReplicas);
+	}
+
+	public void setNumberOfReplicas(String numberOfReplicas) {
+		this.numberOfReplicas = numberOfReplicas;
 	}
 	
 }
