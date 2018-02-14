@@ -32,24 +32,39 @@ public class ConsistentHashingService<T> {
 
 	@Autowired
 	ConfigProvider config;
-	
-	private  HashFunction hashFunction = Hashing.murmur3_128(0);
-	private  int numberOfReplicas;
-	private  SortedMap<Integer, T> circle = new TreeMap<Integer, T>();
+
+	@Autowired
+	RedisServiceManager redisServiceManager;
+	private HashFunction hashFunction = Hashing.murmur3_128(0);
+	private int numberOfReplicas;
+	private SortedMap<Integer, T> circle = new TreeMap<Integer, T>();
 
 	@PostConstruct
 	public void init() throws IOException {
 		this.numberOfReplicas = config.getNumberOfReplicas();
-		List<String> redisNodes = config.getRedisInstances().stream().map(item->item.getHost()+":"+item.getPort()).collect(Collectors.toList());
-		System.out.println("no of replicas -"+numberOfReplicas);
-		System.out.println("redisNodes -"+redisNodes);
-		addNodes((Collection<T>) redisNodes);
+		// List<String> redisNodes =
+		// config.getRedisInstances().stream().map(item->item.getHost()+":"+item.getPort()).collect(Collectors.toList());
+		System.out.println("no of replicas -" + numberOfReplicas);
+		// System.out.println("redisNodes -"+redisNodes);
+//		addNodes((Collection<T>) config.getRedisInstances());
 	}
 
 	public void addNodes(Collection<T> nodes) throws IOException {
+		System.out.println("node add");
 		for (T node : nodes) {
 			add(node);
 		}
+		printTree();
+	}
+
+	public void removeNodes(Collection<T> nodes) throws IOException {
+		for (T node : nodes) {
+			remove(node);
+		}
+		printTree();
+	}
+
+	private void printTree() {
 		// Using iterator in SortedMap
 		Set<Entry<Integer, T>> s = circle.entrySet();
 		Iterator i = s.iterator();
@@ -60,20 +75,24 @@ public class ConsistentHashingService<T> {
 			Map.Entry m = (Map.Entry) i.next();
 
 			int key = (Integer) m.getKey();
-			String value = (String) m.getValue();
+			Object value =  m.getValue();
 
 			System.out.println("Key : " + key + "  value : " + value);
+			
 		}
 	}
 
-	public void add(T node) throws IOException {
+	private void add(T node) throws IOException {
+		System.out.println("add node "+ node.toString());
+		redisServiceManager.createConnection(node);
 		for (int i = 0; i < numberOfReplicas; i++) {
 			// hashFunction.hashBytes(toByteArray(node.toString() + i)).asInt()
 			circle.put(calculateHash(node.toString() + i), node);
 		}
 	}
 
-	public void remove(T node) throws IOException {
+	private void remove(T node) throws IOException {
+		redisServiceManager.removeConnection(node);
 		for (int i = 0; i < numberOfReplicas; i++) {
 			// hashFunction.hashBytes(toByteArray(node.toString() + i)).asInt()
 			circle.remove(calculateHash(node.toString() + i));
