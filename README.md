@@ -2,7 +2,7 @@
 A simple implementation of distribution cache service. It will distribute the load to available cache systems using consistent hashing and allows you to add/remove cache system. It is developed as a spring boot application and uses the Jedis client for radius cache access.
 
 
-#### Endpoint for get cached item from distributed cache
+#### Endpoint for getting a cached item from distributed cache
 
 http://localhost:8080/cache?key=somekey
 
@@ -24,7 +24,7 @@ where,
         "status": "retrieved from 127.0.0.1:6379"
     }
 
-#### Endpoint for set item in distributed cache
+#### Endpoint for setting an item in distributed cache
 
 http://localhost:8080/cache
 
